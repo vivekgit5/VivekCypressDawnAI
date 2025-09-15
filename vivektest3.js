@@ -37,7 +37,6 @@ describe('Running Dawn website chatbot automation', function () {
 
       // wait for chatbot to fully load
       cy.wait(3000);
-      //cy.reload(true);
 
       // Loop through queries from Excel
       cy.wrap(queries).each((query, index) => {
@@ -51,14 +50,17 @@ describe('Running Dawn website chatbot automation', function () {
 
         // Send query
         cy.get('.chatbox_btn', { timeout: 60000 }).click();
+        cy.get('#myTextArea',{ timeout: 60000 }).should('be.visible').and('be.enabled');
 
         // Calculate which child should contain the bot response
         // First response is at nth-child(2), second at nth-child(4), etc.
         const childIndex = (index + 1) * 2;
 
-        // Grab the latest response HTML
+        // Scroll into the specific bot response (pick only one element)
         cy.get(`:nth-child(${childIndex}) > .va_bot_msg`, { timeout: 60000 })
-          .should('be.visible')
+          .first() // ✅ ensures only one element selected
+          .scrollIntoView({ offset: { top: -100, left: 0 }, duration: 500 })
+          .should('exist')
           .invoke('prop', 'innerHTML')
           .then((responseHtml) => {
             // Append query + response to HTML report
@@ -68,12 +70,11 @@ describe('Running Dawn website chatbot automation', function () {
             `;
           });
 
-        // Keep chat window scrolled to bottom
-        cy.get('div.chatbox__messages', { timeout: 60000 })
-          .scrollTo('bottom');
-
-        // Optional: verify thumbs up button is visible
-        cy.get('.thumbs_up', { timeout: 60000 }).should('be.visible');
+        // Optional: verify thumbs up button is visible after response
+        cy.get('.thumbs_up', { timeout: 60000 })
+          .first() // ✅ if multiple thumbs show up
+          .scrollIntoView({ offset: { top: -100, left: 0 }, duration: 500 })
+          .should('exist');
 
         // Ensure input is ready for next query
         cy.get('#myTextArea').should('be.visible');
