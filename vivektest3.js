@@ -3,6 +3,10 @@
 describe('Running Dawn website chatbot automation', function () {
   it('Run multiple queries in the chatbot and capture HTML responses', function () {
 
+    const testUrl = 'https://chat.va-dev.dht.live/'; // ✅ Store tested URL
+    let totalQueries = 0; // ✅ Will count queries dynamically
+    const testTimestamp = new Date().toLocaleString(); // ✅ Capture current date/time
+
     // Start building the HTML report
     let htmlReport = `
       <!DOCTYPE html>
@@ -11,14 +15,71 @@ describe('Running Dawn website chatbot automation', function () {
         <meta charset="UTF-8">
         <title>Chatbot Responses</title>
         <style>
-          body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
-          .query { font-weight: bold; color: #2c3e50; margin-top: 20px; }
-          .response { margin-left: 20px; padding: 10px; background: #f4f6f9; border-radius: 5px; }
-          .conversation { margin-top: 30px; padding: 10px; background: #eafaf1; border-left: 4px solid #2ecc71; }
+          body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            line-height: 1.6; 
+            background: #f9f9fb;
+            color: #2c3e50;
+          }
+          h1 {
+            text-align: center;
+            color: #34495e;
+            margin-bottom: 10px;
+          }
+          .summary {
+            margin: 20px auto;
+            padding: 15px;
+            max-width: 900px;
+            background: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+          }
+          .summary div {
+            margin: 8px 0;
+            font-size: 15px;
+          }
+          .summary strong {
+            color: #2c3e50;
+          }
+          .query-block {
+            margin: 20px auto;
+            padding: 15px;
+            max-width: 900px;
+            background: #ffffff;
+            border: 1px solid #e1e4e8;
+            border-radius: 8px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+          }
+          .query {
+            font-weight: bold; 
+            color: #2980b9; 
+            margin-bottom: 8px;
+          }
+          .response {
+            margin-top: 5px;
+            padding: 12px; 
+            background: #f4f6f9; 
+            border-radius: 6px; 
+            border-left: 4px solid #3498db;
+          }
+          .conversation {
+            margin: 30px auto;
+            padding: 15px;
+            max-width: 900px;
+            background: #eafaf1; 
+            border: 1px solid #b2f0d0;
+            border-left: 6px solid #2ecc71; 
+            border-radius: 8px;
+            font-weight: bold;
+            text-align: center;
+            color: #27ae60;
+          }
         </style>
       </head>
       <body>
-      <h1>Chatbot Query & Response Log</h1>
+      <h1>📋 Chatbot Query & Response Log</h1>
     `;
 
     // Read queries from Excel
@@ -27,9 +88,11 @@ describe('Running Dawn website chatbot automation', function () {
       sheetName: "Sheet1"
     }).then((queries) => {
 
+      totalQueries = queries.length; // ✅ count queries
+
       // Setup viewport + visit chatbot
       cy.viewport(1221, 687);
-      cy.visit('https://chat.va-dev.dht.live/');
+      cy.visit(testUrl);
 
       // Accept terms
       cy.get('.btn').click();
@@ -62,8 +125,10 @@ describe('Running Dawn website chatbot automation', function () {
           .then((responseHtml) => {
             // Append query + response to HTML report
             htmlReport += `
-              <div class="query">Q${index + 1}: ${query}</div>
-              <div class="response">${responseHtml}</div>
+              <div class="query-block">
+                <div class="query">Q${index + 1}: ${query}</div>
+                <div class="response">${responseHtml}</div>
+              </div>
             `;
           });
 
@@ -80,11 +145,30 @@ describe('Running Dawn website chatbot automation', function () {
         cy.get('.btc_chat_group .chat_id', { timeout: 60000 })
           .invoke('text')
           .then((conversationId) => {
+
+            // ✅ Add summary section at the TOP of report
+            const summaryBlock = `
+              <div class="summary">
+                <div><strong>🕒 Test Run Time:</strong> ${testTimestamp}</div>
+                <div><strong>🌐 Tested URL:</strong> ${testUrl}</div>
+                <div><strong>🔢 Total Queries Tested:</strong> ${totalQueries}</div>
+              </div>
+            `;
+            htmlReport = htmlReport.replace(
+              '<h1>📋 Chatbot Query & Response Log</h1>',
+              `<h1>📋 Chatbot Query & Response Log</h1>${summaryBlock}`
+            );
+
+            // ✅ Add conversation ID at the bottom
             htmlReport += `
-              <div class="conversation"><strong>Conversation ID:</strong> ${conversationId}</div>
+              <div class="conversation">💬 Conversation ID: ${conversationId}</div>
             `;
 
-            cy.log('Conversation ID:', conversationId);
+            // ✅ Log in Cypress test runner
+            cy.log('🕒 Test Run Time:', testTimestamp);
+            cy.log('🌐 Tested URL:', testUrl);
+            cy.log('🔢 Total Queries Tested:', totalQueries);
+            cy.log('💬 Conversation ID:', conversationId);
 
             // Close the HTML
             htmlReport += `</body></html>`;
