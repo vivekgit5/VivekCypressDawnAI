@@ -14,6 +14,7 @@ describe('Running Dawn website chatbot automation', function () {
           body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
           .query { font-weight: bold; color: #2c3e50; margin-top: 20px; }
           .response { margin-left: 20px; padding: 10px; background: #f4f6f9; border-radius: 5px; }
+          .conversation { margin-top: 30px; padding: 10px; background: #eafaf1; border-left: 4px solid #2ecc71; }
         </style>
       </head>
       <body>
@@ -28,14 +29,11 @@ describe('Running Dawn website chatbot automation', function () {
 
       // Setup viewport + visit chatbot
       cy.viewport(1221, 687);
-      cy.visit('https://chat.dawn-us-dev.dht.live/');
-      cy.wait(3000);
+      cy.visit('https://chat.va-dev.dht.live/');
 
       // Accept terms
       cy.get('.btn').click();
       cy.get('.terms_agree_agree_btn').click();
-
-      // wait for chatbot to fully load
       cy.wait(3000);
 
       // Loop through queries from Excel
@@ -53,12 +51,11 @@ describe('Running Dawn website chatbot automation', function () {
         cy.get('#myTextArea',{ timeout: 60000 }).should('be.visible').and('be.enabled');
 
         // Calculate which child should contain the bot response
-        // First response is at nth-child(2), second at nth-child(4), etc.
         const childIndex = (index + 1) * 2;
 
-        // Scroll into the specific bot response (pick only one element)
+        // Scroll into the specific bot response
         cy.get(`:nth-child(${childIndex}) > .va_bot_msg`, { timeout: 60000 })
-          .first() // ✅ ensures only one element selected
+          .first()
           .scrollIntoView({ offset: { top: -100, left: 0 }, duration: 500 })
           .should('exist')
           .invoke('prop', 'innerHTML')
@@ -72,20 +69,31 @@ describe('Running Dawn website chatbot automation', function () {
 
         // Optional: verify thumbs up button is visible after response
         cy.get('.thumbs_up', { timeout: 60000 })
-          .first() // ✅ if multiple thumbs show up
+          .first()
           .scrollIntoView({ offset: { top: -100, left: 0 }, duration: 500 })
           .should('exist');
 
-        // Ensure input is ready for next query
         cy.get('#myTextArea').should('be.visible');
       }).then(() => {
-        // Close the HTML
-        htmlReport += `</body></html>`;
 
-        // Write results to an HTML file
-        cy.writeFile('cypress/results/chatbot_responses.html', htmlReport);
+        // ✅ Grab conversation ID before closing HTML
+        cy.get('.btc_chat_group .chat_id', { timeout: 60000 })
+          .invoke('text')
+          .then((conversationId) => {
+            htmlReport += `
+              <div class="conversation"><strong>Conversation ID:</strong> ${conversationId}</div>
+            `;
 
-        cy.log('✅ Chatbot responses saved to chatbot_responses.html');
+            cy.log('Conversation ID:', conversationId);
+
+            // Close the HTML
+            htmlReport += `</body></html>`;
+
+            // Write results to an HTML file
+            cy.writeFile('cypress/results/chatbot_responses.html', htmlReport);
+
+            cy.log('✅ Chatbot responses saved to chatbot_responses.html');
+          });
       });
     });
   });
