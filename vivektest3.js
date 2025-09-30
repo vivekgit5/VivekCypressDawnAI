@@ -57,6 +57,10 @@ describe('Running Dawn website chatbot automation', function () {
             color: #2980b9; 
             margin-bottom: 8px;
           }
+          .query.skipped {
+            color: #7f8c8d;
+            font-style: italic;
+          }
           .response {
             margin-top: 5px;
             padding: 12px; 
@@ -94,17 +98,39 @@ describe('Running Dawn website chatbot automation', function () {
       cy.viewport(1221, 687);
       cy.visit(testUrl);
       cy.wait(5000)
+
       // Accept terms
       cy.get('.btn').click();
       cy.get('.terms_agree_agree_btn').click();
       cy.wait(3000);
 
       // Loop through queries from Excel
-      cy.wrap(queries).each((query, index) => {
+      cy.wrap(queries).each((rawQuery, index) => {
 
-        // Break query into lines (simulate SHIFT+ENTER for newlines)
-        const lines = query.split(/\n|\t/);
+        const originalQuery = rawQuery || ""; // keep as-is for reporting
+        const query = originalQuery.trim();   // trimmed for typing
 
+        if (!query) {
+          cy.log(`Query at index ${index} was empty/whitespace. Adding skipped note to report.`);
+
+          // Add skipped query block to report (show original too)
+          htmlReport += `
+            <div class="query-block">
+              <div class="query skipped">Q${index + 1}: (skipped — empty query: "${originalQuery}")</div>
+              <div class="response">—</div>
+            </div>
+          `;
+
+          return;
+        }
+
+        // ✅ Break query into lines and remove empty ones
+        const lines = query
+          .split(/\n|\t/)
+          .map(line => line.trim())
+          .filter(line => line.length > 0);
+
+        // ✅ Type into textarea with Shift+Enter for newlines
         cy.get('#myTextArea', { timeout: 60000 })
           .should('be.visible')
           .and('be.enabled')
@@ -113,13 +139,12 @@ describe('Running Dawn website chatbot automation', function () {
             lines.forEach((line, i) => {
               cy.wrap($el).type(line, { force: true });
               if (i < lines.length - 1) {
-                // simulate SHIFT+ENTER for multi-line
                 cy.wrap($el).type('{shift}{enter}', { force: true });
               }
             });
           });
 
-        // Press ENTER to send the query (like RETURN in Selenium)
+        // ✅ Finally, send the query with Enter
         cy.get('#myTextArea').type('{enter}', { force: true });
 
         // Wait until input is enabled again
@@ -140,7 +165,7 @@ describe('Running Dawn website chatbot automation', function () {
             // Append query + response to HTML report
             htmlReport += `
               <div class="query-block">
-                <div class="query">Q${index + 1}: ${query.replace(/\n/g, '<br>')}</div>
+                <div class="query">Q${index + 1}: ${originalQuery.replace(/\n/g, '<br>')}</div>
                 <div class="response">${responseHtml}</div>
               </div>
             `;
