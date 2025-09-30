@@ -3,7 +3,7 @@
 describe('Running Dawn website chatbot automation', function () {
   it('Run multiple queries in the chatbot and capture HTML responses', function () {
 
-    const testUrl = 'https://chat.va-dev.dht.live/'; // ✅ Store tested URL
+    const testUrl = 'https://chat.dawn-us-pre-prod.dht.live/'; // ✅ Store tested URL
     let totalQueries = 0; // ✅ Will count queries dynamically
     const testTimestamp = new Date().toLocaleString(); // ✅ Capture current date/time
 
@@ -93,7 +93,7 @@ describe('Running Dawn website chatbot automation', function () {
       // Setup viewport + visit chatbot
       cy.viewport(1221, 687);
       cy.visit(testUrl);
-
+      cy.wait(5000)
       // Accept terms
       cy.get('.btn').click();
       cy.get('.terms_agree_agree_btn').click();
@@ -101,17 +101,31 @@ describe('Running Dawn website chatbot automation', function () {
 
       // Loop through queries from Excel
       cy.wrap(queries).each((query, index) => {
-        
-        // Type the user query
+
+        // Break query into lines (simulate SHIFT+ENTER for newlines)
+        const lines = query.split(/\n|\t/);
+
         cy.get('#myTextArea', { timeout: 60000 })
           .should('be.visible')
           .and('be.enabled')
           .clear()
-          .type(query);
+          .then(($el) => {
+            lines.forEach((line, i) => {
+              cy.wrap($el).type(line, { force: true });
+              if (i < lines.length - 1) {
+                // simulate SHIFT+ENTER for multi-line
+                cy.wrap($el).type('{shift}{enter}', { force: true });
+              }
+            });
+          });
 
-        // Send query
-        cy.get('.chatbox_btn', { timeout: 60000 }).click();
-        cy.get('#myTextArea',{ timeout: 60000 }).should('be.visible').and('be.enabled');
+        // Press ENTER to send the query (like RETURN in Selenium)
+        cy.get('#myTextArea').type('{enter}', { force: true });
+
+        // Wait until input is enabled again
+        cy.get('#myTextArea', { timeout: 60000 })
+          .should('be.visible')
+          .and('be.enabled');
 
         // Calculate which child should contain the bot response
         const childIndex = (index + 1) * 2;
@@ -126,7 +140,7 @@ describe('Running Dawn website chatbot automation', function () {
             // Append query + response to HTML report
             htmlReport += `
               <div class="query-block">
-                <div class="query">Q${index + 1}: ${query}</div>
+                <div class="query">Q${index + 1}: ${query.replace(/\n/g, '<br>')}</div>
                 <div class="response">${responseHtml}</div>
               </div>
             `;
