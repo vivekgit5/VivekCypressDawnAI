@@ -3,7 +3,7 @@
 describe('Running Dawn website chatbot automation', function () {
   it('Run multiple queries in the chatbot and capture HTML responses', function () {
 
-    const testUrl = 'https://chat.dawn-us-pre-prod.dht.live/'; // ✅ Store tested URL
+    const testUrl = 'https://chat-myair.dawn-us-pre-prod.dht.live/'; // ✅ Store tested URL
     let totalQueries = 0; // ✅ Will count queries dynamically
     const testTimestamp = new Date().toLocaleString(); // ✅ Capture current date/time
 
@@ -97,12 +97,12 @@ describe('Running Dawn website chatbot automation', function () {
       // Setup viewport + visit chatbot
       cy.viewport(1221, 687);
       cy.visit(testUrl);
-      cy.wait(5000)
+      cy.pause(40000)
 
       // Accept terms
-      cy.get('.btn').click();
-      cy.get('.terms_agree_agree_btn').click();
-      cy.wait(3000);
+      //cy.get('.btn').click();
+      //cy.get('.terms_agree_agree_btn').click();
+      cy.wait(5000);
 
       // Loop through queries from Excel
       cy.wrap(queries).each((rawQuery, index) => {
@@ -181,9 +181,9 @@ describe('Running Dawn website chatbot automation', function () {
       }).then(() => {
 
         // ✅ Grab conversation ID before closing HTML
-        cy.get('.btc_chat_group .chat_id', { timeout: 60000 })
-          .invoke('text')
-          .then((conversationId) => {
+        //cy.get('.btc_chat_group .chat_id', { timeout: 60000 })
+          //.invoke('text')
+          //.then((conversationId) => {
 
             // ✅ Add summary section at the TOP of report
             const summaryBlock = `
@@ -200,14 +200,14 @@ describe('Running Dawn website chatbot automation', function () {
 
             // ✅ Add conversation ID at the bottom
             htmlReport += `
-              <div class="conversation">💬 Conversation ID: ${conversationId}</div>
+              <div class="conversation">💬 Conversation ID: ${testUrl}</div>
             `;
 
             // ✅ Log in Cypress test runner
             cy.log('🕒 Test Run Time:', testTimestamp);
             cy.log('🌐 Tested URL:', testUrl);
             cy.log('🔢 Total Queries Tested:', totalQueries);
-            cy.log('💬 Conversation ID:', conversationId);
+            cy.log('💬 Conversation ID:', testUrl);
 
             // Close the HTML
             htmlReport += `</body></html>`;
@@ -220,4 +220,3 @@ describe('Running Dawn website chatbot automation', function () {
       });
     });
   });
-});
