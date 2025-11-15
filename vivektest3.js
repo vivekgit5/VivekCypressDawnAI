@@ -98,11 +98,11 @@ describe('Running Dawn Website Chatbot Automation', function () {
       // Manually set chatbotConfig to simulate form fill
       cy.window().then((win) => {
         win.chatbotConfig = {
-          name: "Vivek",
-          email: "myair.i9ne@taas.dht.live",
-          my_therapy_navigator_enabled: true,
-          my_therapy_navigator_opt_out: false,
-          access_token: "eyJraWQiOiItS2hpSkJVMFRUQUg1UG9QNGxvVVN4dkxVbWpqeGZDNzhOUjl4QWVJeXFJIiwiYWxnIjoiUlMyNTYifQ.eyJ2ZXIiOjEsImp0aSI6IkFULkRJZzVvYi1sdUJUNklNOTE3MXZfc1pnVDNrMmJZUVREYmt6U243Y2t3em8iLCJpc3MiOiJodHRwczovL3Jlc21lZC1kaHQtdWF0Lm9rdGFwcmV2aWV3LmNvbS9vYXV0aDIvYXVzcmNrZGwyNUN6MzY1N2cxZDciLCJhdWQiOiJodHRwczovL2Rhd24ucmVzbWVkLmNvbS9hcGkiLCJpYXQiOjE3NjMwMTcyMzEsImV4cCI6MTc2MzAxOTAzMSwiY2lkIjoiMG9hcmNrNXlscGs2NVFpYXIxZDciLCJ1aWQiOiIwMHVycTBmZHU5dDJxTklUZjFkNyIsInNjcCI6WyJkYXduIl0sImF1dGhfdGltZSI6MTc2MzAxNzIzMSwic3ViIjoibXlhaXIuaTluZUB0YWFzLmRodC5saXZlIn0.W9t-uXg6zLazBhu9kkwRi9R3T-etXLp5SXCEOvgu4OvP_ReNfff-2Es6esbeFaFYIYgw0sivN2BPaLNErfQdnmTJFHLgnYm0OpgE5rev7cb90X6VZ4o2cBn6FCB6SPENGnOj5rGZMrqpr7Z9beZ4LSwA94gA4B9ZtgdOHFmwU1R5ic0d8Dd55HDK__l9EdsbtrJWD42j8X0F88uWqw8J9CgZpqDwzUBBes2kc99BiXyCC7zDTWj3xSpU3yH525X0UjUeOFV4uBc8mbQwlwTqJUkFvaQVwLC3vTJh5f_MNLvPHmvDbdQ6MSoZt8Cm4Ya_1WtBsklc6ATSOYw4CYEwog" // Make sure the token is valid
+          name: "Vivek_new",
+    email: "myair.i9ne@taas.dht.live",
+    my_therapy_navigator_enabled: true,
+    my_therapy_navigator_opt_out: false,
+    access_token: "eyJraWQiOiItS2hpSkJVMFRUQUg1UG9QNGxvVVN4dkxVbWpqeGZDNzhOUjl4QWVJeXFJIiwiYWxnIjoiUlMyNTYifQ.eyJ2ZXIiOjEsImp0aSI6IkFULjJFVWM3aFh2Z2NRTS1Kc08wYWlRak1La0R2Q1R0ZlVydXIyOG1DRzhkQ0kiLCJpc3MiOiJodHRwczovL3Jlc21lZC1kaHQtdWF0Lm9rdGFwcmV2aWV3LmNvbS9vYXV0aDIvYXVzcmNrZGwyNUN6MzY1N2cxZDciLCJhdWQiOiJodHRwczovL2Rhd24ucmVzbWVkLmNvbS9hcGkiLCJpYXQiOjE3NjMyMDQzMjUsImV4cCI6MTc2MzIwNjEyNSwiY2lkIjoiMG9hcmNrNXlscGs2NVFpYXIxZDciLCJ1aWQiOiIwMHVycTBmZHU5dDJxTklUZjFkNyIsInNjcCI6WyJkYXduIl0sImF1dGhfdGltZSI6MTc2MzIwNDMyNSwic3ViIjoibXlhaXIuaTluZUB0YWFzLmRodC5saXZlIn0.JsxdHblp-ly_oU-LlaQoDti7E-kFBIWAgtSAX3ns-_gIsjDiqTA3GoEWGbnJpEb0fHQIsrs275cTYRiDNox7WDxf-zBqIMWsTR7w_P8mYTQa9oxJWzU1pLMhMY1Ur_RNaWf--TLtPRuDXsBpLBMX4dGjTTXQfIW_yVCq5gn05URB7I0P76rDK6JdfLTTZRempPUgViT-oEhukOm1nh44xgf_AQW2qy8cFHYOdwg8RmktMo13LxEt1ckaaAo_DsMKT-D-iNjpQHj7U06PmcR2gy39fo-O32mbLPw4MRHbZHab-fwpqIJaKfsXoXq1x8OFrg6F_csiQEKxzvMX0W1oKg"
         };
       });
 
