@@ -5,13 +5,13 @@ describe('Running Dawn Website Chatbot Automation', function () {
   let totalQueries = 0; // To count the number of queries
   const testTimestamp = new Date().toLocaleString(); // Capture current test date and time
 
-  // Start building the HTML report
-  let htmlReport = `
+  // Start building the HTML report for normal queries
+  let normalHtmlReport = `
     <!DOCTYPE html>
     <html>
     <head>
       <meta charset="UTF-8">
-      <title>Chatbot Responses</title>
+      <title>Chatbot Responses - Normal Queries</title>
       <style>
         body { 
           font-family: Arial, sans-serif; 
@@ -52,9 +52,65 @@ describe('Running Dawn Website Chatbot Automation', function () {
           color: #2980b9; 
           margin-bottom: 8px;
         }
-        .query.skipped {
-          color: #7f8c8d;
-          font-style: italic;
+        .response {
+          margin-top: 5px;
+          padding: 12px; 
+          background: #f4f6f9; 
+          border-radius: 6px; 
+          border-left: 4px solid #3498db;
+        }
+      </style>
+    </head>
+    <body>
+    <h1>📋 Chatbot Query & Response Log - Normal Queries</h1>
+  `;
+
+  // Start building the HTML report for predefined queries
+  let predefinedHtmlReport = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>Chatbot Responses - Predefined Queries</title>
+      <style>
+        body { 
+          font-family: Arial, sans-serif; 
+          margin: 20px; 
+          line-height: 1.6; 
+          background: #f9f9fb;
+          color: #2c3e50;
+        }
+        h1 {
+          text-align: center;
+          color: #34495e;
+          margin-bottom: 10px;
+        }
+        .summary {
+          margin: 20px auto;
+          padding: 15px;
+          max-width: 900px;
+          background: #ffffff;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .summary div {
+          margin: 8px 0;
+          font-size: 15px;
+        }
+        .query-block {
+          margin: 20px auto;
+          padding: 15px;
+          max-width: 900px;
+          background: #ffffff;
+          border: 1px solid #e1e4e8;
+          border-radius: 8px;
+          box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        }
+        .query {
+          font-weight: bold; 
+          color: #2980b9; 
+          margin-bottom: 8px;
         }
         .response {
           margin-top: 5px;
@@ -63,22 +119,10 @@ describe('Running Dawn Website Chatbot Automation', function () {
           border-radius: 6px; 
           border-left: 4px solid #3498db;
         }
-        .conversation {
-          margin: 30px auto;
-          padding: 15px;
-          max-width: 900px;
-          background: #eafaf1; 
-          border: 1px solid #b2f0d0;
-          border-left: 6px solid #2ecc71; 
-          border-radius: 8px;
-          font-weight: bold;
-          text-align: center;
-          color: #27ae60;
-        }
       </style>
     </head>
     <body>
-    <h1>📋 Chatbot Query & Response Log</h1>
+    <h1>📋 Chatbot Query & Response Log - Predefined Queries</h1>
   `;
 
   it('Run predefined and multiple queries in the chatbot and capture HTML responses', function () {
@@ -124,6 +168,17 @@ describe('Running Dawn Website Chatbot Automation', function () {
           .should('be.visible')
           .and('be.enabled');
         
+        // Capture the response
+        cy.get('.va_bot_msg').first().invoke('prop', 'innerHTML').then((predefinedResponse) => {
+          // Save predefined responses to predefinedHtmlReport
+          predefinedHtmlReport += `
+            <div class="query-block">
+              <div class="query">Predefined Query ${index + 1}</div>
+              <div class="response">${predefinedResponse}</div>
+            </div>
+          `;
+        });
+
         // Close the query interaction (using the close button)
         cy.get('.icn-close').click();
 
@@ -139,7 +194,7 @@ describe('Running Dawn Website Chatbot Automation', function () {
         // Skip empty or whitespace-only queries
         if (!query) {
           cy.log(`Query at index ${index} was empty/whitespace. Adding skipped note to report.`);
-          htmlReport += `
+          normalHtmlReport += `
             <div class="query-block">
               <div class="query skipped">Q${index + 1}: (skipped — empty query: "${originalQuery}")</div>
               <div class="response">—</div>
@@ -184,45 +239,57 @@ describe('Running Dawn Website Chatbot Automation', function () {
           .should('exist')
           .invoke('prop', 'innerHTML')
           .then((responseHtml) => {
-            // Append query and response to HTML report
-            htmlReport += `
+            // Append query and response to HTML report for normal queries
+            normalHtmlReport += `
               <div class="query-block">
                 <div class="query">Q${index + 1}: ${originalQuery.replace(/\n/g, '<br>')}</div>
                 <div class="response">${responseHtml}</div>
               </div>
             `;
           });
+
+        // Optionally verify thumbs-up button visibility after response
+        cy.get('.thumbs_up', { timeout: 60000 })
+          .first()
+          .scrollIntoView({ offset: { top: -100, left: 0 }, duration: 500 })
+          .should('exist');
+
+        cy.get('#myTextArea').should('be.visible');
+      }).then(() => {
+        // Add summary block to the top of the HTML report for normal queries
+        const summaryBlock = `
+          <div class="summary">
+            <div><strong>🕒 Test Run Time:</strong> ${testTimestamp}</div>
+            <div><strong>🌐 Tested URL:</strong> ${testUrl}</div>
+            <div><strong>🔢 Total Queries Tested:</strong> ${totalQueries}</div>
+          </div>
+        `;
+        normalHtmlReport = normalHtmlReport.replace(
+          '<h1>📋 Chatbot Query & Response Log</h1>',
+          `<h1>📋 Chatbot Query & Response Log</h1>${summaryBlock}`
+        );
+
+        // Add conversation ID at the bottom (optional)
+        normalHtmlReport += `
+          <div class="conversation">💬 Conversation ID: ${testUrl}</div>
+        `;
+
+        // Log final details in Cypress test runner
+        cy.log('🕒 Test Run Time:', testTimestamp);
+        cy.log('🌐 Tested URL:', testUrl);
+        cy.log('🔢 Total Queries Tested:', totalQueries);
+        cy.log('💬 Conversation ID:', testUrl);
+
+        // Close HTML document and write to file for normal queries
+        normalHtmlReport += `</body></html>`;
+        cy.writeFile('cypress/results/chatbot_normal_responses.html', normalHtmlReport);
+
+        // Close HTML document and write to file for predefined queries
+        predefinedHtmlReport += `</body></html>`;
+        cy.writeFile('cypress/results/chatbot_predefined_responses.html', predefinedHtmlReport);
+
+        cy.log('✅ Normal and predefined chatbot responses saved to respective HTML files');
       });
-
-      // Add summary block to the top of the HTML report
-      const summaryBlock = `
-        <div class="summary">
-          <div><strong>🕒 Test Run Time:</strong> ${testTimestamp}</div>
-          <div><strong>🌐 Tested URL:</strong> ${testUrl}</div>
-          <div><strong>🔢 Total Queries Tested:</strong> ${totalQueries}</div>
-        </div>
-      `;
-      htmlReport = htmlReport.replace(
-        '<h1>📋 Chatbot Query & Response Log</h1>',
-        `<h1>📋 Chatbot Query & Response Log</h1>${summaryBlock}`
-      );
-
-      // Add conversation ID at the bottom (optional)
-      htmlReport += `
-        <div class="conversation">💬 Conversation ID: ${testUrl}</div>
-      `;
-
-      // Log final details in Cypress test runner
-      cy.log('🕒 Test Run Time:', testTimestamp);
-      cy.log('🌐 Tested URL:', testUrl);
-      cy.log('🔢 Total Queries Tested:', totalQueries);
-      cy.log('💬 Conversation ID:', testUrl);
-
-      // Close HTML document and write to file
-      htmlReport += `</body></html>`;
-      cy.writeFile('cypress/results/chatbot_responses.html', htmlReport);
-
-      cy.log('✅ Chatbot responses saved to chatbot_responses.html');
     });
   });
 });
