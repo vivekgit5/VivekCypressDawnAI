@@ -145,7 +145,7 @@ describe('Running Dawn Website Chatbot Automation', function () {
           email: "myair.rdm3@taas.dht.live",
           my_therapy_navigator_enabled: true,
           my_therapy_navigator_opt_out: false,
-          access_token: "eyJraWQiOiItS2hpSkJVMFRUQUg1UG9QNGxvVVN4dkxVbWpqeGZDNzhOUjl4QWVJeXFJIiwiYWxnIjoiUlMyNTYifQ.eyJ2ZXIiOjEsImp0aSI6IkFULmtBMWZKTUdsMTZQWmg1Q3hvaXNxd2FfcTlzSElpUTBPWFVTWEZCOHBqdDgiLCJpc3MiOiJodHRwczovL3Jlc21lZC1kaHQtdWF0Lm9rdGFwcmV2aWV3LmNvbS9vYXV0aDIvYXVzcmNrZGwyNUN6MzY1N2cxZDciLCJhdWQiOiJodHRwczovL2Rhd24ucmVzbWVkLmNvbS9hcGkiLCJpYXQiOjE3NjM2MjIxOTgsImV4cCI6MTc2MzYyMzk5OCwiY2lkIjoiMG9hcmNrNXlscGs2NVFpYXIxZDciLCJ1aWQiOiIwMHVycTJlazZ6RDdsazN6SzFkNyIsInNjcCI6WyJkYXduIl0sImF1dGhfdGltZSI6MTc2MzYyMjE5OCwic3ViIjoibXlhaXIucmRtM0B0YWFzLmRodC5saXZlIn0.ueYaJW-CIfkbncmIk080Sc35srtuEb36AhGIFaZiGauKdAiPtVJoB1pFmBH1l-fdFIxe4RTUHLcQOMRDmBjIfJHNmh-n8AgRA0ntT-iImTj7CFzD760vmVHvs9kGmdS0u66TW5z_y_55EwAXXZK5LWZ3s9HtPoBS0fw75zny76Gw2S6rJ3_QxLhd6gqznOJbiv7AlPwDvOpO5pk3RsSgen78m7vs4OnOVUkzGOMUeoYmwLawic22hwgEtwZ2WBhOVCkBzJBpy-HoFZ1eyYl3qYbCTaFxG0nh488R4r6vUZq5SVUMVqSmRclkoxABRcDgxhJVBzEhLSmKC-sxfAwrcA" // Make sure the token is valid
+          access_token: "eyJraWQiOiItS2hpSkJVMFRUQUg1UG9QNGxvVVN4dkxVbWpqeGZDNzhOUjl4QWVJeXFJIiwiYWxnIjoiUlMyNTYifQ.eyJ2ZXIiOjEsImp0aSI6IkFULmY3Qjg3ZGFoNE43TmR5Slg5OG1FaXhiRV9nZUdYUkU1UUxBTEN1Vk5RNDgiLCJpc3MiOiJodHRwczovL3Jlc21lZC1kaHQtdWF0Lm9rdGFwcmV2aWV3LmNvbS9vYXV0aDIvYXVzcmNrZGwyNUN6MzY1N2cxZDciLCJhdWQiOiJodHRwczovL2Rhd24ucmVzbWVkLmNvbS9hcGkiLCJpYXQiOjE3NjM2MjQxOTYsImV4cCI6MTc2MzYyNTk5NiwiY2lkIjoiMG9hcmNrNXlscGs2NVFpYXIxZDciLCJ1aWQiOiIwMHVycTJlazZ6RDdsazN6SzFkNyIsInNjcCI6WyJkYXduIl0sImF1dGhfdGltZSI6MTc2MzYyNDE5Niwic3ViIjoibXlhaXIucmRtM0B0YWFzLmRodC5saXZlIn0.cs_ZpRFwSUBb4Ob7cff8MPMn4v7TuTDokrVWpv3GF3zJaBiKJCddOuqfnAe4O3DoMKnjUfoN1IIsFTsNakLz7d3Gy5y9SFhTtMeFwwQ3IHUqTRLpkCYWEvN44duAN1H462MVHTGhh1AcAAh3CF1uaDZKqcu3i5ko1e_WS6F2Dwim0rG3ijvTcrpccz7MWjL-PG3Jtki6dbxACHq0Rz9_9fiedZ8eOjvUaNefGSjphhUsLFMFTPqD_9Bg9EuJMjaV4LOyyuRLnmXLAcOjgbW6bdd0UgXJOpXKnyYWgvBKQ_zMnHtS_8bP_-Qs7F1XVvWI-g1Ypl-s0F5WAXTDWhi0_w" // Make sure the token is valid
         };
       });
 
@@ -161,40 +161,43 @@ describe('Running Dawn Website Chatbot Automation', function () {
 
       predefinedQueries.forEach((querySelector, index) => {
         
-        // Click predefined query
-        cy.get(querySelector).click();
+        // Capture the actual query text before clicking the predefined query
+        cy.get(querySelector).invoke('text').then((queryText) => {
+          // Click predefined query
+          cy.get(querySelector).click();
 
-        // Wait for NEW BOT MESSAGE to appear
-        cy.get('.va_bot_msg', { timeout: 60000 })
-          .should('have.length.greaterThan', 0);
+          // Wait for NEW BOT MESSAGE to appear
+          cy.get('.va_bot_msg', { timeout: 60000 })
+            .should('have.length.greaterThan', 0);
 
-        // Capture *latest* bot message, not first()
-        cy.get('.va_bot_msg')
-          .last()
-          .scrollIntoView()
-          .should('exist')
-          .invoke('prop', 'innerHTML')
-          .then((predefinedResponse) => {
+          // Capture *latest* bot message, not first()
+          cy.get('.va_bot_msg')
+            .last()
+            .scrollIntoView()
+            .should('exist')
+            .invoke('prop', 'innerHTML')
+            .then((predefinedResponse) => {
 
-            predefinedHtmlReport += `
-              <div class="query-block">
-                <div class="query">Predefined Query ${index + 1}</div>
-                <div class="response">${predefinedResponse}</div>
-              </div>
-            `;
-          });
+              predefinedHtmlReport += `
+                <div class="query-block">
+                  <div class="query">${queryText}</div> <!-- Display the actual predefined query -->
+                  <div class="response">${predefinedResponse}</div>
+                </div>
+              `;
+            });
 
-        // Wait for thumbs-up button to appear (to ensure full response is rendered)
-        cy.get('.thumbs_up', { timeout: 60000 })
-          .first()
-          .scrollIntoView({ offset: { top: -100, left: 0 }, duration: 500 })
-          .should('exist');
+          // Wait for thumbs-up button to appear (to ensure full response is rendered)
+          cy.get('.thumbs_up', { timeout: 60000 })
+            .first()
+            .scrollIntoView({ offset: { top: -100, left: 0 }, duration: 500 })
+            .should('exist');
 
-        // Close the query interaction (using the close button)
-        cy.get('.icn-close').click();
+          // Close the query interaction (using the close button)
+          cy.get('.icn-close').click();
 
-        // Optionally, click the 'Chat with us' button again if necessary
-        cy.get('.btn.btn-outline-danger').click();
+          // Optionally, click the 'Chat with us' button again if necessary
+          cy.get('.btn.btn-outline-danger').click();
+        });
       });
 
       // 2. **Now Run Normal Queries**
